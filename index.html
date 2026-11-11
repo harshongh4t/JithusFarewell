@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jithu's Final Episode</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=IBM+Plex+Mono:wght@400;600&family=Inter:wght@400;600&display=swap">
+<style>
+/* Layout: one 16:9 "episode" stage that plays scene by scene, transport bar beneath, chapter list below.
+   Single deliberate dark look: a security-console night screen with alert red and severity amber. */
+:root{
+  color-scheme: dark;
+  --ink:#0c0f1e;
+  --panel:#151a31;
+  --line:#283057;
+  --text:#eef0fb;
+  --muted:#9aa2c8;
+  --alert:#ff4a5a;
+  --amber:#ffb547;
+  --cyan:#6fd6ff;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Inter", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"IBM Plex Mono", Consolas, "Courier New", monospace;
+}
+html,body{background:var(--ink);color:var(--text)}
+body{font-family:var(--f-body);padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:20px 40px}
+.wrap{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px}
+.brand{font-family:var(--f-display);font-weight:800;font-size:1.15rem;letter-spacing:-.01em}
+.brand span{color:var(--alert)}
+.hint{color:var(--muted);font-size:.8rem}
+kbd{font-family:var(--f-mono);font-size:.75rem;border:1px solid var(--line);border-radius:4px;padding:0 5px;color:var(--text)}
+
+/* Player */
+#player{display:flex;flex-direction:column;gap:0;background:var(--ink)}
+#player:fullscreen{justify-content:center;align-items:center;padding:0}
+.frame{position:relative;width:100%;max-width:100%;aspect-ratio:16/9;background:var(--panel);border:1px solid var(--line);border-radius:10px 10px 0 0;overflow:hidden;container-type:inline-size}
+#player:fullscreen .frame{width:min(100vw, calc((100vh - 52px) * 16 / 9));border-radius:0;border:0}
+#player:fullscreen .bar{width:min(100vw, calc((100vh - 52px) * 16 / 9));border-radius:0}
+.frame::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(60% 80% at 85% 10%, color-mix(in srgb, var(--alert) 16%, transparent), transparent 70%),
+  repeating-linear-gradient(0deg, transparent 0 3px, color-mix(in srgb, var(--text) 3%, transparent) 3px 4px);
+  pointer-events:none}
+
+.scene{position:absolute;inset:0;padding:6cqw 7cqw;display:flex;flex-direction:column;justify-content:center;gap:2cqw;visibility:hidden}
+.scene.active{visibility:visible}
+.tag{font-family:var(--f-mono);font-size:1.5cqw;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.h1{font-family:var(--f-display);font-weight:800;font-size:6.4cqw;line-height:1.02;letter-spacing:-.02em;text-wrap:balance;margin:0}
+.h2{font-family:var(--f-display);font-weight:800;font-size:4.2cqw;line-height:1.05;letter-spacing:-.015em;text-wrap:balance;margin:0}
+.lead{font-size:2.3cqw;line-height:1.45;color:var(--muted);max-width:62cqw;margin:0}
+.red{color:var(--alert)} .amber{color:var(--amber)} .cyan{color:var(--cyan)}
+
+/* entrance animation, played each time a scene becomes active */
+.scene.active .in{animation:rise .7s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--d,0) * 1s)}
+.scene.still .in, .scene.still *{animation:none !important}
+@keyframes rise{from{opacity:0;transform:translateY(2.5cqw)}to{opacity:1;transform:none}}
+
+/* 1. cold open */
+.breaking{display:inline-flex;align-items:center;gap:1.2cqw;align-self:flex-start;background:var(--alert);color:var(--ink);font-family:var(--f-mono);font-weight:600;font-size:1.8cqw;letter-spacing:.12em;padding:.8cqw 1.6cqw;border-radius:.6cqw}
+.dot{width:1.2cqw;height:1.2cqw;border-radius:50%;background:var(--ink)}
+.scene.active .dot{animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:.15}}
+.ticker{position:absolute;left:0;right:0;bottom:0;background:color-mix(in srgb, var(--alert) 85%, var(--ink));color:var(--ink);font-family:var(--f-mono);font-weight:600;font-size:1.6cqw;white-space:nowrap;overflow:hidden;padding:1cqw 0}
+.ticker span{display:inline-block;padding-left:100%}
+.scene.active .ticker span{animation:tick 18s linear infinite}
+@keyframes tick{to{transform:translateX(-100%)}}
+
+/* 2. advisory */
+.adv{font-family:var(--f-mono);border:1px solid var(--line);background:color-mix(in srgb, var(--ink) 70%, transparent);border-radius:1cqw;padding:2.4cqw 3cqw;display:grid;grid-template-columns:auto 1fr;gap:1.1cqw 3cqw;font-size:1.9cqw;line-height:1.35}
+.adv dt{color:var(--muted)} .adv dd{margin:0}
+.sev{display:inline-block;background:var(--alert);color:var(--ink);font-weight:600;padding:0 1cqw;border-radius:.4cqw}
+.cvss{display:flex;align-items:baseline;gap:1.5cqw}
+.cvss b{font-family:var(--f-display);font-size:7cqw;color:var(--alert);line-height:1}
+
+/* 3. height chart */
+.chart{display:grid;grid-template-columns:1fr 1fr;gap:6cqw;align-items:end;height:30cqw;border-bottom:2px solid var(--line);padding:0 8cqw;position:relative}
+.col{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:1cqw}
+.barv{width:100%;border-radius:.8cqw .8cqw 0 0;transform-origin:bottom}
+.barv.avg{height:45%;background:var(--muted)}
+.barv.jithu{height:130%;background:linear-gradient(var(--amber), color-mix(in srgb, var(--amber) 60%, var(--alert)));margin-top:-30%}
+.scene.active .barv{animation:grow 1.4s cubic-bezier(.2,.8,.2,1) both}
+.scene.active .barv.jithu{animation-duration:2.6s;animation-delay:.6s}
+@keyframes grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+.collab{font-family:var(--f-mono);font-size:1.6cqw;color:var(--muted);text-align:center}
+.chartwrap{position:relative;overflow:hidden;padding-top:2cqw}
+.clip{position:absolute;top:2.4cqw;right:3cqw;font-family:var(--f-mono);font-size:1.4cqw;color:var(--amber);border:1px dashed var(--amber);padding:.4cqw 1cqw;border-radius:.4cqw;background:var(--panel)}
+
+/* 4. tutorial steps */
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1.3cqw}
+.steps li{display:grid;grid-template-columns:7cqw 1fr;align-items:center;font-size:2.4cqw;line-height:1.3}
+.steps .n{font-family:var(--f-mono);font-size:1.6cqw;color:var(--cyan);letter-spacing:.08em}
+
+/* 5. patch notes */
+.kb{display:grid;grid-template-columns:repeat(3, minmax(0,1fr));gap:2cqw}
+.kb section{border-top:.4cqw solid var(--c, var(--line));padding-top:1.4cqw;display:flex;flex-direction:column;gap:1cqw;min-width:0}
+.kb h3{margin:0;font-family:var(--f-mono);font-size:1.6cqw;letter-spacing:.12em;text-transform:uppercase;color:var(--c)}
+.kb p{margin:0;font-size:2cqw;line-height:1.4}
+
+/* 6. message */
+.letter{font-size:2.35cqw;line-height:1.55;max-width:74cqw;margin:0}
+.sign{font-family:var(--f-display);font-weight:800;font-size:2.8cqw;color:var(--amber)}
+
+/* 7. outro */
+.subscribe{align-self:flex-start;display:inline-flex;gap:1.4cqw;align-items:center;background:var(--alert);color:var(--ink);font-weight:600;font-size:2.2cqw;padding:1.2cqw 2.4cqw;border-radius:5cqw}
+.url{font-family:var(--f-mono);font-size:2cqw;color:var(--cyan)}
+
+/* transport */
+.bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-top:0;border-radius:0 0 10px 10px;padding:10px 12px;width:100%}
+.btn{font:600 .85rem var(--f-body);color:var(--text);background:transparent;border:1px solid var(--line);border-radius:6px;padding:6px 12px;cursor:pointer;min-height:34px}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--alert);border-color:var(--alert);color:var(--ink)}
+.btn:focus-visible,.chap:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.segs{flex:1 1 220px;display:flex;gap:4px;min-width:0}
+.seg{flex:var(--w,1) 1 0;height:6px;background:var(--line);border-radius:3px;overflow:hidden;cursor:pointer;border:0;padding:0}
+.seg i{display:block;height:100%;width:0;background:var(--alert)}
+.time{font-family:var(--f-mono);font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* chapters */
+.chapters{display:grid;grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));gap:8px;list-style:none;margin:0;padding:0}
+.chap{width:100%;text-align:left;display:flex;gap:10px;align-items:baseline;background:transparent;border:1px solid var(--line);border-radius:8px;padding:10px 12px;color:var(--text);font:400 .9rem var(--f-body);cursor:pointer}
+.chap .ts{font-family:var(--f-mono);font-size:.75rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.chap[aria-current="true"]{border-color:var(--alert);background:color-mix(in srgb, var(--alert) 10%, transparent)}
+.note{color:var(--muted);font-size:.8rem;margin:0}
+
+@media (prefers-reduced-motion: reduce){
+  .scene .in, .scene *{animation:none !important}
+}
+</style>
+<style>*,*::before,*::after{box-sizing:border-box}body{margin:0}img{max-width:100%}</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="top">
+    <div class="brand">The Cyber Scroll <span>·</span> Final Episode</div>
+    <div class="hint"><kbd>Space</kbd> play/pause · <kbd>←</kbd> <kbd>→</kbd> chapters · <kbd>F</kbd> full screen</div>
+  </div>
+
+  <div id="player">
+    <div class="frame" id="frame">
+
+      <!-- 1 -->
+      <div class="scene active still" data-dur="9" data-title="Breaking alert">
+        <div class="breaking in"><span class="dot"></span>BREAKING ALERT</div>
+        <h1 class="h1 in" style="--d:.3">🚨 Critical team member<br>leaving the network</h1>
+        <p class="lead in" style="--d:.8">A farewell episode for <b style="color:var(--text)">Jithendran Subburaj</b>. We just call him Jithu.</p>
+        <div class="ticker"><span>LIVE · THREAT LEVEL: EMOTIONAL · TEAM MORALE AT RISK · NO PATCH AVAILABLE · STAY TUNED · LIVE · THREAT LEVEL: EMOTIONAL · TEAM MORALE AT RISK ·</span></div>
+      </div>
+
+      <!-- 2 -->
+      <div class="scene" data-dur="14" data-title="Security advisory">
+        <div class="tag in">Security Advisory · Published 2026</div>
+        <h2 class="h2 in" style="--d:.2">CVE-2026-JITHU</h2>
+        <dl class="adv in" style="--d:.5">
+          <dt>Severity</dt><dd><span class="cvss"><b>10.0</b><span class="sev">CRITICAL</span></span></dd>
+          <dt>Affected</dt><dd>The entire team. All versions.</dd>
+          <dt>Impact</dt><dd>Loss of 10+ years of hands-on security product expertise, and the team's go-to person for ePO.</dd>
+          <dt>Workaround</dt><dd class="red">None available.</dd>
+          <dt>Status</dt><dd class="amber">Cannot be patched. Can only be celebrated.</dd>
+        </dl>
+      </div>
+
+      <!-- 3 -->
+      <div class="scene" data-dur="13" data-title="Threat intel: height">
+        <div class="tag in">Threat Intel · Physical Characteristics</div>
+        <h2 class="h2 in" style="--d:.2">Subject is <span class="amber">very</span> tall</h2>
+        <div class="chartwrap in" style="--d:.4">
+          <div class="clip">Chart clipped: subject exceeds axis</div>
+          <div class="chart">
+            <div class="col"><div class="barv avg"></div></div>
+            <div class="col"><div class="barv jithu"></div></div>
+          </div>
+          <div class="chart" style="height:auto;border:0;padding-top:1cqw">
+            <div class="collab">Average engineer</div>
+            <div class="collab amber">Jithu</div>
+          </div>
+        </div>
+        <p class="lead in" style="--d:2.4">He spotted problems before anyone else. Partly expertise, partly because he could see over every monitor in the room.</p>
+      </div>
+
+      <!-- 4 -->
+      <div class="scene" data-dur="16" data-title="Step-by-step guide">
+        <div class="tag in">Tutorial · Step-by-Step Guide</div>
+        <h2 class="h2 in" style="--d:.2">How Jithu upgraded our team</h2>
+        <ol class="steps">
+          <li class="in" style="--d:1"><span class="n">STEP 1</span><span>Take a complex problem nobody wants to touch.</span></li>
+          <li class="in" style="--d:2.6"><span class="n">STEP 2</span><span>Explain it so clearly that anyone can follow.</span></li>
+          <li class="in" style="--d:4.2"><span class="n">STEP 3</span><span>Repeat for every teammate who asks. Never sigh.</span></li>
+          <li class="in" style="--d:5.8"><span class="n">STEP 4</span><span>Record it and share it with the world: <span class="cyan">87 episodes</span> and counting.</span></li>
+          <li class="in" style="--d:7.4"><span class="n">STEP 5</span><span>Leave the team stronger than you found it.</span></li>
+        </ol>
+      </div>
+
+      <!-- 5 -->
+      <div class="scene" data-dur="14" data-title="Patch notes">
+        <div class="tag in">Cumulative Team Update · KB-JITHU-2026</div>
+        <h2 class="h2 in" style="--d:.2">Patch notes</h2>
+        <div class="kb">
+          <section class="in" style="--c:var(--alert);--d:.8"><h3>Removed</h3><p>10+ years of security expertise.</p><p>The team's tallest escalation point.</p></section>
+          <section class="in" style="--c:var(--amber);--d:2.2"><h3>Known issues</h3><p>Questions that took 5 minutes may now take 5 hours.</p><p>Top shelves are unreachable again.</p></section>
+          <section class="in" style="--c:var(--cyan);--d:3.6"><h3>Workaround</h3><p>Subscribe to The Cyber Scroll and keep learning from him.</p></section>
+        </div>
+      </div>
+
+      <!-- 6 -->
+      <div class="scene" data-dur="22" data-title="A message from Harsh">
+        <div class="tag in">A message from Harsh</div>
+        <p class="letter in" style="--d:.4">Jithu, when I think about what makes a great teammate, I think of you. You never kept knowledge to yourself. Whether it was a tricky issue at the end of a long day or a question I was almost too shy to ask, you explained it patiently and made it make sense.</p>
+        <p class="letter in" style="--d:4">And you did that for all of us, not just me. You raised the bar for the whole team and showed us that the best experts are the ones who lift others up. We'll miss you more than we can say. Thank you, and all the very best for what comes next.</p>
+        <div class="sign in" style="--d:7">Harsh</div>
+      </div>
+
+      <!-- 7 -->
+      <div class="scene" data-dur="12" data-title="Thanks for watching">
+        <div class="tag in">End screen</div>
+        <h1 class="h1 in" style="--d:.2">Thanks for everything, <span class="amber">Jithu</span>.</h1>
+        <p class="lead in" style="--d:.8">Stay curious, stay secure, and stay one step ahead. Your next chapter starts now 🚀</p>
+        <div class="subscribe in" style="--d:1.4">Subscribe to his next chapter</div>
+        <div class="url in" style="--d:1.8">youtube.com/@TheCyberScroll</div>
+      </div>
+
+    </div>
+
+    <div class="bar">
+      <button class="btn primary" id="play" type="button">▶ Play</button>
+      <button class="btn" id="prev" type="button" aria-label="Previous chapter">⏮</button>
+      <button class="btn" id="next" type="button" aria-label="Next chapter">⏭</button>
+      <div class="segs" id="segs"></div>
+      <span class="time" id="time">0:00 / 0:00</span>
+      <button class="btn" id="fs" type="button">Full screen</button>
+    </div>
+  </div>
+
+  <ol class="chapters" id="chapters"></ol>
+</div>
+
+<script>
+const scenes = [...document.querySelectorAll(".scene")];
+const durs = scenes.map(s => +s.dataset.dur);
+const total = durs.reduce((a, b) => a + b, 0);
+const starts = durs.map((_, k) => durs.slice(0, k).reduce((a, b) => a + b, 0));
+const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+
+const segs = document.getElementById("segs");
+const chapters = document.getElementById("chapters");
+scenes.forEach((s, k) => {
+  const b = document.createElement("button");
+  b.className = "seg"; b.type = "button"; b.style.setProperty("--w", durs[k]);
+  b.setAttribute("aria-label", "Go to " + s.dataset.title);
+  b.innerHTML = "<i></i>"; b.onclick = () => go(k);
+  segs.appendChild(b);
+  const li = document.createElement("li");
+  const c = document.createElement("button");
+  c.className = "chap"; c.type = "button";
+  c.innerHTML = `<span class="ts">${fmt(starts[k])}</span><span></span>`;
+  c.lastChild.textContent = s.dataset.title;
+  c.onclick = () => go(k);
+  li.appendChild(c); chapters.appendChild(li);
+});
+const fills = [...segs.querySelectorAll("i")];
+const chapBtns = [...chapters.querySelectorAll(".chap")];
+
+let i = 0, elapsed = 0, playing = false, last = 0;
+const playBtn = document.getElementById("play");
+const timeEl = document.getElementById("time");
+
+function render() {
+  fills.forEach((f, k) => f.style.width = k < i ? "100%" : k > i ? "0%" : (elapsed / durs[i] * 100) + "%");
+  chapBtns.forEach((c, k) => c.setAttribute("aria-current", k === i ? "true" : "false"));
+  timeEl.textContent = `${fmt(starts[i] + elapsed)} / ${fmt(total)}`;
+}
+function go(k) {
+  scenes.forEach(s => s.classList.remove("active", "still"));
+  i = Math.max(0, Math.min(scenes.length - 1, k));
+  elapsed = 0;
+  void scenes[i].offsetWidth;
+  scenes[i].classList.add("active");
+  render();
+}
+function setPlaying(p) {
+  playing = p;
+  playBtn.textContent = p ? "❚❚ Pause" : (i === scenes.length - 1 && elapsed >= durs[i] ? "↺ Replay" : "▶ Play");
+  if (p) { scenes[i].classList.contains("still") && go(i); last = performance.now(); requestAnimationFrame(tick); }
+}
+function tick(now) {
+  if (!playing) return;
+  elapsed += (now - last) / 1000; last = now;
+  if (elapsed >= durs[i]) {
+    if (i < scenes.length - 1) go(i + 1);
+    else { elapsed = durs[i]; render(); setPlaying(false); return; }
+  }
+  render();
+  requestAnimationFrame(tick);
+}
+playBtn.onclick = () => {
+  if (!playing && i === scenes.length - 1 && elapsed >= durs[i]) go(0);
+  setPlaying(!playing);
+};
+document.getElementById("prev").onclick = () => go(i - 1);
+document.getElementById("next").onclick = () => go(i + 1);
+const player = document.getElementById("player");
+document.getElementById("fs").onclick = () => {
+  try {
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    else player.requestFullscreen?.().catch(() => {});
+  } catch (e) {}
+};
+document.addEventListener("keydown", e => {
+  if (e.target.closest("button") && e.key === " ") return;
+  if (e.key === " ") { e.preventDefault(); playBtn.click(); }
+  else if (e.key === "ArrowRight") go(i + 1);
+  else if (e.key === "ArrowLeft") go(i - 1);
+  else if (e.key === "f" || e.key === "F") document.getElementById("fs").click();
+});
+render();
+</script>
+</body>
+</html>
